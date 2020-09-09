@@ -7,6 +7,7 @@ import com.spring.cloud.constant.ProductLine;
 import com.spring.cloud.converter.CouponCategoryConverter;
 import com.spring.cloud.converter.DistributeTargetConverter;
 import com.spring.cloud.converter.ProductLineConverter;
+import com.spring.cloud.converter.TemplateRuleConverter;
 import com.spring.cloud.serialization.CouponTemplateSerialize;
 import com.spring.cloud.vo.TemplateRule;
 import lombok.AllArgsConstructor;
@@ -76,7 +77,7 @@ public class CouponTemplate implements Serializable {
     private DistributeTarget target;
 
     @Column(name = "rule", nullable = false)
-    @Convert(converter = DistributeTargetConverter.class)
+    @Convert(converter = TemplateRuleConverter.class)
     private TemplateRule rule;
 
     public CouponTemplate(String name, String logo, String desc, String category,
