@@ -14,6 +14,10 @@ zuul:
       path: /coupon-template/**
       serviceId: eureka-client-coupon-template
       strip-prefix: false
+    distribution:
+      path: /coupon-distribution/**
+      serviceId: eureka-client-coupon-distribution
+      strip-prefix: false
   host:
     connect-timeout-millis: 15000
     socket-timeout-millis: 60000
