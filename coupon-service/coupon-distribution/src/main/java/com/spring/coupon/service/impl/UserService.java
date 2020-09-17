@@ -14,13 +14,16 @@ import com.spring.coupon.vo.*;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -199,6 +202,51 @@ public class UserService implements IUserService {
     @Override
     public SettlementInfo settlement(SettlementInfo info)
             throws CouponException {
-        return null;
+        List<SettlementInfo.CouponAndTemplateInfo> ctInfos =
+                info.getCouponAndTemplateInfos();
+        if (CollectionUtils.isEmpty(ctInfos)) {
+            log.error("Empty coupon");
+            double goodsSum = 0.0;
+            for (GoodsInfo goodsInfo : info.getGoodsInfos()) {
+                goodsSum += goodsInfo.getPrice() + goodsInfo.getCount();
+            }
+            info.setCost(retain2Decimals(goodsSum));
+        }
+
+        List<Coupon> coupons = findCouponsByStatus(
+                info.getUserId(), CouponStatus.USABLE.getCode()
+        );
+        Map<Integer, Coupon> id2Coupon = coupons.stream()
+                .collect(Collectors.toMap(Coupon::getId, Function.identity()));
+        if(MapUtils.isEmpty(id2Coupon) || !CollectionUtils.isSubCollection(
+                ctInfos.stream().map(SettlementInfo.CouponAndTemplateInfo::getId)
+                        .collect(Collectors.toList()),id2Coupon.keySet()
+        )) {
+            log.info("{}", id2Coupon.keySet());
+            log.error("User coupon is not sub collection");
+            throw new CouponException("User coupon is not sub collection");
+        }
+        List<Coupon> settleCoupons = new ArrayList<>(ctInfos.size());
+        ctInfos.forEach(c -> settleCoupons.add(id2Coupon.get(c.getId())));
+
+        SettlementInfo proceedInfo = settlementClient.computedRule(info).getData();
+
+        if (proceedInfo.getEmploy() && CollectionUtils.isNotEmpty(
+                proceedInfo.getCouponAndTemplateInfos()
+        )) {
+            log.info("Settle user coupon: {}, {}",info.getUserId(), JSON.toJSONString(settleCoupons));
+            redisService.addCouponToCache(info.getUserId(), settleCoupons, CouponStatus.USED.getCode());
+            kafkaTemplate.send(Constant.TOPIC, JSON.toJSONString(new CouponKafkaMessage(
+                    CouponStatus.USED.getCode(),
+                    settleCoupons.stream().map(Coupon::getId).collect(Collectors.toList())
+            )));
+        }
+        return proceedInfo;
+    }
+
+    private double retain2Decimals(double value) {
+        return new BigDecimal(value)
+                .setScale(2, BigDecimal.ROUND_HALF_UP)
+                .doubleValue();
     }
 }

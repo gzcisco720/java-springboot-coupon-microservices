@@ -15,5 +15,4 @@ public class GoodsInfo {
 
     private Integer count;
 
-
 }
