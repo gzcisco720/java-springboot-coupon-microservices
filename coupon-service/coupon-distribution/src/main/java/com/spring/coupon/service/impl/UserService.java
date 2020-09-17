@@ -14,12 +14,13 @@ import com.spring.coupon.vo.*;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -115,13 +116,84 @@ public class UserService implements IUserService {
     @Override
     public List<CouponTemplateSDK> findAvailableTemplate(Long userId)
             throws CouponException {
-        return null;
+        long currentTime = new Date().getTime();
+        List <CouponTemplateSDK> templateSDKS =
+                templateClient.findAllUsableTemplate().getData();
+        log.debug("Find all template count: {}", templateSDKS.size());
+        templateSDKS = templateSDKS.stream()
+                .filter(t -> t.getRule().getExpiration().getDeadline() > currentTime)
+                .collect(Collectors.toList());
+        log.info("Find usable template count: {}", templateSDKS.size());
+
+        // key -> templateId
+        // Pair key -> limitation
+        Map<Integer, Pair<Integer, CouponTemplateSDK>> limit2Template =
+                new HashMap<>(templateSDKS.size());
+        templateSDKS.forEach(t -> limit2Template.put(
+                t.getId(), Pair.of(t.getRule().getLimitation(), t)
+        ));
+        List<CouponTemplateSDK> result = new ArrayList<>(limit2Template.size());
+        List<Coupon> userUsableCoupons = findCouponsByStatus(userId, CouponStatus.USABLE.getCode());
+
+        log.debug("Current user has usable coupons: {} {}", userId, userUsableCoupons.size());
+
+        Map<Integer, List<Coupon>> templateId2Coupons = userUsableCoupons
+                .stream()
+                .collect(Collectors.groupingBy(Coupon::getTemplateId));
+
+        limit2Template.forEach((k,v) -> {
+            Integer limitation = v.getLeft();
+            CouponTemplateSDK templateSDK = v.getRight();
+            if (templateId2Coupons.containsKey(k) && templateId2Coupons.get(k).size() >= limitation) {
+                return;
+            }
+            result.add(templateSDK);
+        });
+
+        return result;
     }
 
     @Override
     public Coupon acquireTemplate(AcquireTemplateRequest request)
             throws CouponException {
-        return null;
+        Map<Integer, CouponTemplateSDK> id2Template = templateClient.findIds2TemplateSDK(Collections.singletonList(
+                request.getTemplateSDK().getId()
+        )).getData();
+        if (id2Template.size()<=0) {
+            log.error("Cannot get template from template client: {}", request.getTemplateSDK().getId());
+            throw new CouponException("Cannot get template from template client" + request.getTemplateSDK().getId());
+        }
+        List<Coupon> usableCoupons = findCouponsByStatus(request.getUserId(), CouponStatus.USED.getCode());
+        Map<Integer, List<Coupon>> templateId2Coupons = usableCoupons.stream()
+                .collect(Collectors.groupingBy(Coupon::getTemplateId));
+        if (templateId2Coupons.containsKey(request.getTemplateSDK().getId()) &&
+        templateId2Coupons.get(request.getTemplateSDK().getId()).size() >=
+        request.getTemplateSDK().getRule().getLimitation()) {
+            log.error("Exceed limitation: {}", request.getTemplateSDK().getId());
+            throw new CouponException("Exceed limitation: " + request.getTemplateSDK().getId());
+        }
+        String couponCode = redisService.tryToAcquireCouponCodeFromCache(
+                request.getTemplateSDK().getId()
+        );
+        if (StringUtils.isEmpty(couponCode)) {
+            log.error("Cannot get template from template client: {}", request.getTemplateSDK().getId());
+            throw new CouponException("Cannot get template from template client" + request.getTemplateSDK().getId());
+        }
+        Coupon newCoupon = new Coupon(
+                request.getTemplateSDK().getId(),
+                request.getUserId(),
+                couponCode,
+                CouponStatus.USABLE
+        );
+        newCoupon = couponDao.save(newCoupon);
+
+        newCoupon.setTemplateSDK(request.getTemplateSDK());
+
+        redisService.addCouponToCache(request.getUserId(),
+                Collections.singletonList(newCoupon),
+                CouponStatus.USABLE.getCode());
+
+        return newCoupon;
     }
 
     @Override
