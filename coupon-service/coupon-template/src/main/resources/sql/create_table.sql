@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `imooc_coupon_data`.`coupon_template` (
+CREATE TABLE IF NOT EXISTS `springcloud`.`coupon_template` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `available` boolean NOT NULL DEFAULT false COMMENT 'availability',
   `expired` boolean NOT NULL DEFAULT false COMMENT 'expiration',
