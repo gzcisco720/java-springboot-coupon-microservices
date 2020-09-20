@@ -42,8 +42,8 @@ public class UserService implements IUserService {
 
     public UserService(CouponDao couponDao,
                        IRedisService redisService,
-                       @Qualifier("eureka-client-coupon-template") TemplateClient templateClient,
-                       @Qualifier("eureka-client-coupon-settlement") SettlementClient settlementClient,
+                       TemplateClient templateClient,
+                       SettlementClient settlementClient,
                        KafkaTemplate<String, String> kafkaTemplate) {
         this.couponDao = couponDao;
         this.redisService = redisService;
