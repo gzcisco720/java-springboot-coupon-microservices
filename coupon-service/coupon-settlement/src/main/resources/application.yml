@@ -1,0 +1,13 @@
+server:
+  port: 7003
+  servlet:
+    context-path: /coupon-settlement
+spring:
+  application:
+    name: eureka-client-coupon-settlement
+eureka:
+  client:
+    service-url: http://localhost:8000/eureka/
+logging:
+  level:
+    com.spring.coupon: debug
