@@ -6,9 +6,9 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8001/eureka/
+      defaultZone: http://localhost:8000/eureka/
 zuul:
-  prefix: /imooc
+  prefix: /app
   routes:
     template:
       path: /coupon-template/**

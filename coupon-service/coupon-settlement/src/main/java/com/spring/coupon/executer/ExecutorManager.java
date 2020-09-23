@@ -50,7 +50,7 @@ public class ExecutorManager implements BeanPostProcessor {
             if (categories.size() != 2) {
                 throw new CouponException("Not support");
             } else {
-                if (categories.contains(CouponCategory.DEDUCTION) && categories.contains(CouponCategory.DISCOUNT)) {
+                if (categories.contains(CouponCategory.REBATE) && categories.contains(CouponCategory.DISCOUNT)) {
                     result = executorIndex.get(RuleFlag.REBATE_DISCOUNT).computeRule(settlement);
                 } else {
                     throw new CouponException("Not support");

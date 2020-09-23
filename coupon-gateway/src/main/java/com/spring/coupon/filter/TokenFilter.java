@@ -6,12 +6,12 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
-@Component
+//@Component
 public class TokenFilter extends AbstractPreZuulFilter {
     @Override
     protected Object cRun() {
         HttpServletRequest request = context.getRequest();
-        log.info(String.format("%s request to %s%",request.getMethod(),request.getRequestURL().toString()));
+        log.info(String.format("%s request to %s",request.getMethod(),request.getRequestURL().toString()));
         Object token = request.getParameter("token");
         if (null == token) {
             log.error("Error: token is empty");
