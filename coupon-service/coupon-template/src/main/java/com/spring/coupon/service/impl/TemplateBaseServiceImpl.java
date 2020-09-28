@@ -1,6 +1,6 @@
 package com.spring.coupon.service.impl;
 
-import com.spring.coupon.dao.CouponTemplateDao;
+import com.spring.coupon.dao.CouponTemplateRepository;
 import com.spring.coupon.entity.CouponTemplate;
 import com.spring.coupon.exception.CouponException;
 import com.spring.coupon.service.ITemplateBaseService;
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 @Service
 public class TemplateBaseServiceImpl implements ITemplateBaseService {
 
-    private final CouponTemplateDao templateDao;
+    private final CouponTemplateRepository templateDao;
 
-    public TemplateBaseServiceImpl(CouponTemplateDao templateDao) {
+    public TemplateBaseServiceImpl(CouponTemplateRepository templateDao) {
         this.templateDao = templateDao;
     }
 

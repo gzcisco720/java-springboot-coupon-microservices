@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface CouponDao extends JpaRepository<Coupon, Integer> {
+public interface CouponRepository extends JpaRepository<Coupon, Integer> {
     List<Coupon> findAllByUserIdAndStatus(Long userId, CouponStatus status);
 }

@@ -3,7 +3,7 @@ package com.spring.coupon.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.spring.coupon.constant.Constant;
 import com.spring.coupon.constant.CouponStatus;
-import com.spring.coupon.dao.CouponDao;
+import com.spring.coupon.dao.CouponRepository;
 import com.spring.coupon.entity.Coupon;
 import com.spring.coupon.exception.CouponException;
 import com.spring.coupon.feign.SettlementClient;
@@ -17,7 +17,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +29,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserService implements IUserService {
 
-    private final CouponDao couponDao;
+    private final CouponRepository couponRepository;
 
     private final IRedisService redisService;
 
@@ -40,12 +39,12 @@ public class UserService implements IUserService {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public UserService(CouponDao couponDao,
+    public UserService(CouponRepository couponRepository,
                        IRedisService redisService,
                        TemplateClient templateClient,
                        SettlementClient settlementClient,
                        KafkaTemplate<String, String> kafkaTemplate) {
-        this.couponDao = couponDao;
+        this.couponRepository = couponRepository;
         this.redisService = redisService;
         this.templateClient = templateClient;
         this.settlementClient = settlementClient;
@@ -64,7 +63,7 @@ public class UserService implements IUserService {
             preTarget = currentCached;
         } else {
             log.debug("coupon cache is empty, get coupon from db: {} {}", userId, status);
-            List<Coupon> dbCoupons = couponDao.findAllByUserIdAndStatus(
+            List<Coupon> dbCoupons = couponRepository.findAllByUserIdAndStatus(
                     userId, CouponStatus.of(status)
             );
             if (CollectionUtils.isNotEmpty(dbCoupons)) {
@@ -188,7 +187,7 @@ public class UserService implements IUserService {
                 couponCode,
                 CouponStatus.USABLE
         );
-        newCoupon = couponDao.save(newCoupon);
+        newCoupon = couponRepository.save(newCoupon);
 
         newCoupon.setTemplateSDK(request.getTemplateSDK());
 

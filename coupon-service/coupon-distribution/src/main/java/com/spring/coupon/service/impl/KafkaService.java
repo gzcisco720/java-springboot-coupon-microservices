@@ -3,7 +3,7 @@ package com.spring.coupon.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.spring.coupon.constant.Constant;
 import com.spring.coupon.constant.CouponStatus;
-import com.spring.coupon.dao.CouponDao;
+import com.spring.coupon.dao.CouponRepository;
 import com.spring.coupon.entity.Coupon;
 import com.spring.coupon.service.IKafkaService;
 import com.spring.coupon.vo.CouponKafkaMessage;
@@ -20,10 +20,10 @@ import java.util.Optional;
 @Service
 public class KafkaService implements IKafkaService {
 
-    private final CouponDao couponDao;
+    private final CouponRepository couponRepository;
 
-    public KafkaService(CouponDao couponDao) {
-        this.couponDao = couponDao;
+    public KafkaService(CouponRepository couponRepository) {
+        this.couponRepository = couponRepository;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class KafkaService implements IKafkaService {
 
     private void processCouponByStatus(CouponKafkaMessage kafkaMessage,
                                        CouponStatus status){
-        List<Coupon> coupons = couponDao.findAllById(kafkaMessage.getIds());
+        List<Coupon> coupons = couponRepository.findAllById(kafkaMessage.getIds());
         if (CollectionUtils.isEmpty(coupons) || coupons.size() != kafkaMessage.getIds().size()) {
             log.error("Cannot find right coupon info: {}", JSON.toJSONString(kafkaMessage));
             return;
@@ -77,6 +77,6 @@ public class KafkaService implements IKafkaService {
         coupons.forEach(c -> {
             c.setStatus(status);
         });
-        log.info("Processed messages count: {}", couponDao.saveAll(coupons).size());
+        log.info("Processed messages count: {}", couponRepository.saveAll(coupons).size());
     }
 }

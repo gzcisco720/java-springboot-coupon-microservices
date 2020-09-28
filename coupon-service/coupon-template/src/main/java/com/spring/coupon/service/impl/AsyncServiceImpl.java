@@ -2,7 +2,7 @@ package com.spring.coupon.service.impl;
 
 import com.google.common.base.Stopwatch;
 import com.spring.coupon.constant.Constant;
-import com.spring.coupon.dao.CouponTemplateDao;
+import com.spring.coupon.dao.CouponTemplateRepository;
 import com.spring.coupon.entity.CouponTemplate;
 import com.spring.coupon.service.IAsyncService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 @Service
 public class AsyncServiceImpl implements IAsyncService {
 
-    private final CouponTemplateDao templateDao;
+    private final CouponTemplateRepository templateDao;
     private final StringRedisTemplate redisTemplate;
 
-    public AsyncServiceImpl(CouponTemplateDao templateDao, StringRedisTemplate redisTemplate) {
+    public AsyncServiceImpl(CouponTemplateRepository templateDao, StringRedisTemplate redisTemplate) {
         this.templateDao = templateDao;
         this.redisTemplate = redisTemplate;
     }

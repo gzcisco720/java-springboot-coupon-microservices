@@ -1,6 +1,6 @@
 package com.spring.coupon.service.impl;
 
-import com.spring.coupon.dao.CouponTemplateDao;
+import com.spring.coupon.dao.CouponTemplateRepository;
 import com.spring.coupon.vo.TemplateRequest;
 import com.spring.coupon.entity.CouponTemplate;
 import com.spring.coupon.exception.CouponException;
@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class BuildTemplateServiceImpl implements IBuildTemplateService {
-    private final CouponTemplateDao templateDao;
+    private final CouponTemplateRepository templateDao;
     private final IAsyncService asyncService;
 
-    public BuildTemplateServiceImpl(CouponTemplateDao templateDao, IAsyncService asyncService) {
+    public BuildTemplateServiceImpl(CouponTemplateRepository templateDao, IAsyncService asyncService) {
         this.templateDao = templateDao;
         this.asyncService = asyncService;
     }

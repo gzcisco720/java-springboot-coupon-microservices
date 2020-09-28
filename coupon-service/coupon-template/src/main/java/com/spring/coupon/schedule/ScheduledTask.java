@@ -1,6 +1,6 @@
 package com.spring.coupon.schedule;
 
-import com.spring.coupon.dao.CouponTemplateDao;
+import com.spring.coupon.dao.CouponTemplateRepository;
 import com.spring.coupon.entity.CouponTemplate;
 import com.spring.coupon.vo.TemplateRule;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +16,9 @@ import java.util.List;
 @Slf4j
 @Component
 public class ScheduledTask {
-    private final CouponTemplateDao templateDao;
+    private final CouponTemplateRepository templateDao;
 
-    public ScheduledTask(CouponTemplateDao templateDao) {
+    public ScheduledTask(CouponTemplateRepository templateDao) {
         this.templateDao = templateDao;
     }
 
