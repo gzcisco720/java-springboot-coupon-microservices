@@ -19,8 +19,8 @@ public class UserRoleMapping implements Serializable {
     private Integer id;
 
     @Column(name = "role_id", nullable = false)
-    private String roleId;
+    private Integer roleId;
 
     @Column(name = "user_id", nullable = false)
-    private String userId;
+    private Long userId;
 }

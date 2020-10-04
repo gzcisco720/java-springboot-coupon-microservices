@@ -1,4 +1,4 @@
-package com.spring.coupon;
+package com.spring.coupon.constant;
 
 public enum HttpMethodEnum {
     GET,

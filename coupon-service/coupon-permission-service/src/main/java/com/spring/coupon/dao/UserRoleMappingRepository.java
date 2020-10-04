@@ -4,5 +4,5 @@ import com.spring.coupon.entity.UserRoleMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRoleMappingRepository extends JpaRepository<UserRoleMapping, Integer> {
-    UserRoleMapping findByUserId(Integer userId);
+    UserRoleMapping findByUserId(Long userId);
 }

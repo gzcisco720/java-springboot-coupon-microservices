@@ -1,4 +1,4 @@
-package com.spring.coupon;
+package com.spring.coupon.constant;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -19,8 +19,8 @@ public class RolePathMapping implements Serializable {
     private Integer id;
 
     @Column(name = "role_id", nullable = false)
-    private String roleId;
+    private Integer roleId;
 
     @Column(name = "path_id", nullable = false)
-    private String pathId;
+    private Integer pathId;
 }
